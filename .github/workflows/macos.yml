@@ -1,0 +1,26 @@
+name: macOS app
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build runtime
+        run: |
+          brew install python@3.14 python-tk@3.14
+          brew install --cask android-platform-tools
+          /opt/homebrew/bin/python3.14 -m venv .venv
+          .venv/bin/python -m pip install -r requirements-build.txt
+      - name: Build and test
+        run: bash scripts/build_macos.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: YaOS-Debloater-macos-arm64
+          path: |
+            dist/*.dmg
+            dist/SHA256SUMS.txt
